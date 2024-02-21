@@ -1,0 +1,17 @@
+@startuml context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam wrapWidth 300
+LAYOUT_WITH_LEGEND()
+LAYOUT_LANDSCAPE()
+
+title
+ <i>Социальная сеть</i>
+end title
+
+Person(user, "Пользователь")
+  
+System_Ext(main, "Социальная сеть")
+Rel(user, main, "")
+
+@enduml
