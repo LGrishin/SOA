@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS post;
+
+CREATE TABLE user (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  firstname TEXT NOT NULL,
+  lastname TEXT NOT NULL,
+  birthdate TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL
+);
+
