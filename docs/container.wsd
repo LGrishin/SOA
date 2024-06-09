@@ -1,0 +1,47 @@
+@startuml context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam wrapWidth 300
+LAYOUT_WITH_LEGEND()
+LAYOUT_LANDSCAPE()
+
+title
+ <i>Социальная сеть</i>
+end title
+
+
+System_Boundary(main_boundary, "Главный сервис") {
+  System_Ext(main, "Бэкенд")
+  System_Ext(main_front, "Фронтенд")
+  Rel(main_front, main, "Взаимодействие по REST API")
+}
+
+Person(user, "Пользователь")
+
+System_Boundary(message_processing_system, "Сервис сбора статистики о лайках и просмотрах") {
+ System_Ext(statistics, "Сервис статистики")
+ Container(clickhouse, "ClickHouse", "Анализ и хранение данных о лайках и просмотрах")
+ SystemQueue(broker, "RabbitMQ", "Брокер сообщений для получения данных от главного сервиса")
+'  SystemQueue(response_queue, "Kafka", "Ответы для публикации")
+'  Container(vk_publsher, "VK Publisher", "Python", "Публикация ответов в ВК")
+'  Container(ok_publsher, "OK Publisher", "Java, Selenium", "Публикация ответов в Одноклассники")
+ 
+ Rel(statistics, broker, "Потребляет", "RabbitMQ")
+ Rel(statistics, clickhouse, "Хранение и анализ данных")
+ Rel(main, broker, "Сохраняет", "RabbitMQ")
+'  Rel(vk_publsher, response_queue, "Сохраняет", "kafka")
+'  Rel(ok_publsher, response_queue, "Потребляет", "kafka")
+'  Rel(operator, feedback, "Отвечает на сообщение", "Внутренний REST API")
+}
+
+System_Boundary(data_service_boundary, "Сервис менеджмента постов и лайков") {
+ System_Ext(data_service, "Сервис постов и лайков")
+ Container(database_1, "Database", "Postgress", "Анализ и хранение данных о постах и комментариях")
+
+ Rel(data_service, database_1, "Потребляет и сохраняет")
+}
+
+Rel(user, main_front, "Постит, комментит, лайкает")
+Rel(main, data_service, "Отправляет и комментарии и посты", "GRPC")
+Rel(main, statistics, "Получает статистику", "GRPC")
+@enduml
