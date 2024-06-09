@@ -1,0 +1,19 @@
+services:
+  main-server-db:
+    image: huecker.io/library/postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: main-server-db
+
+  main-server:
+    build:
+      context: .
+      dockerfile: ./main-server/Dockerfile
+    ports:
+      - '5000:5000'
+    environment:
+      DATABASE_LOCATION: 'postgresql://postgres:password@main-server-db:5432/main-server-db'
+      SECRETS_PATH: './secrets'
+    depends_on:
+      - main-server-db    
