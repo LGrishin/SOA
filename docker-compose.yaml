@@ -1,19 +1,45 @@
 services:
-  main-server-db:
+  post-service-db:
     image: huecker.io/library/postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: main-server-db
+      POSTGRES_DB: post-service-db
+    expose:
+      - '5200'
+    command: -p 5200
 
-  main-server:
+  post-service:
+    container_name: post-service
+    build:
+      context: .
+      dockerfile: ./post-service/Dockerfile
+    expose:
+      - '5001'
+    environment:
+      DATABASE_LOCATION: 'postgresql://postgres:password@post-service-db:5200/post-service-db'
+      POST_SERV_PORT: 5001
+    depends_on:
+      - post-service-db    
+
+  main-service-db:
+    image: huecker.io/library/postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: main-service-db
+
+  main-service:
     build:
       context: .
       dockerfile: ./main-server/Dockerfile
     ports:
       - '5000:5000'
     environment:
-      DATABASE_LOCATION: 'postgresql://postgres:password@main-server-db:5432/main-server-db'
+      DATABASE_LOCATION: 'postgresql://postgres:password@main-service-db:5432/main-service-db'
       SECRETS_PATH: './secrets'
+      POST_SERV_ADDR: post-service:5001
+
     depends_on:
-      - main-server-db    
+      - main-service-db    
+      - post-service

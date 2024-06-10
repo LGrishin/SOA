@@ -4,3 +4,4 @@ SQLAlchemy
 Werkzeug
 Psycopg2
 pyjwt
+grpcio-tools
