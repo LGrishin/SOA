@@ -1,0 +1,330 @@
+openapi: '3.0.2'
+info:
+  title: Main server API
+  version: '1.0'
+servers:
+  - url: http://127.0.0.1:5000
+paths:
+  /register:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: Registering a new user.
+      operationId: createUser
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: false
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: false
+        schema:
+          type: string
+
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: successful operation
+        '409':
+          description: User with this login alredy exist
+  /login:
+    get:
+      tags:
+        - user
+      summary: Logs user into the system
+      description: ''
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid username/password supplied
+  /update:
+    put:
+      tags:
+        - user
+      summary: Update user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: JWT Access Token
+          in: path
+          description: Access token for this user
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: New password
+          required: false
+          schema:
+            type: string
+        - name: first name
+          in: query
+          description: First name
+          required: false
+          schema:
+            type: string
+        - name: last name
+          in: query
+          description: Last name
+          required: false
+          schema:
+            type: string
+        - name: birthdate
+          in: query
+          description: Birthday
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: User's email
+          required: false
+          schema:
+            type: string
+        - name: phone
+          in: query
+          description: User's phone
+          required: false
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token
+        '404':
+          description: User not found
+  /add-post:
+    post:
+      tags:
+        - post
+        - user
+      summary: Creates a new post on the network
+      description: 'Creates a new post on the network'
+      operationId: loginUser
+      parameters:
+        - name: content
+          in: path
+          description: User content
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token
+        '404':
+          description: User not found
+
+  /update-post:
+    put:
+      tags:
+        - user
+        - post
+      summary: Changes the content of the publication
+      description: 'Changes the content of the publication'
+      operationId: loginUser
+      parameters:
+        - name: user access token
+          in: path
+          description: user access token
+          required: true
+          schema:
+            type: string
+        - name: post_id
+          in: path
+          description: post id
+          required: true
+          schema:
+            type: integer
+        - name: new_content
+          in: path
+          description: updated content of the publication
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /delete-post:
+    put:
+      tags:
+        - user
+        - post
+      summary: Deletes a user post
+      description: 'Deletes a user post'
+      operationId: loginUser
+      parameters:
+        - name: user access token
+          in: path
+          description: user access token
+          required: true
+          schema:
+            type: string
+        - name: post_id
+          in: path
+          description: post id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token, access denied
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /get-post:
+    put:
+      tags:
+        - user
+        - post
+      summary: Provides the content of the publication
+      description: 'Provides the content of the publication'
+      operationId: loginUser
+      parameters:
+        - name: user access token
+          in: path
+          description: user access token
+          required: true
+          schema:
+            type: string
+        - name: post_id
+          in: path
+          description: post id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token, access denied
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /get-posts:
+    put:
+      tags:
+        - user
+        - post
+      summary: Provides the content of several publications
+      description: 'Provides the content of several publications'
+      operationId: loginUser
+      parameters:
+        - name: user access token
+          in: path
+          description: user access token
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: path
+          description: offset relative to the beginning of the entire list of publications by time 
+          required: true
+          schema:
+            type: integer
+        - name: number_of_posts
+          in: path
+          description: the number of posts the user wants to receive
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: successful operation
+        '403':
+          description: Invalid access token, access denied
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: 'mannaya_kasha_228'
+        password:
+          type: string
+          example: 'ahahahha'
+        firstName:
+          type: string
+          example: Lavrenty
+        lastName:
+          type: string
+          example: Grishin
+        birthdate:
+          type: string
+          example: "21.11.2001"
+        email:
+          type: string
+          example: lvgrishin@edu.hse.ru
+        phone:
+          type: string
+          example: '8 (495) 952-88-33'
+      xml:
+        name: user
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 10
+        user_id:
+          type: integer
+          format: int32
+          example: 11
+        content:
+          type: string
+          example: "Share information about something interesting"
+      xml:
+        name: post

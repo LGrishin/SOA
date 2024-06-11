@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+SQLAlchemy
+Werkzeug
+Psycopg2
+pyjwt
+grpcio-tools
