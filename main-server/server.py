@@ -125,7 +125,7 @@ def update_user_data():
 @app.route('/add-post', methods=['POST'])
 def add_post():
     token = request.form['token']
-    user_id = get_uid_by_jwt(token)
+    user_id = int(get_uid_by_jwt(token))
     content = request.form['content']
     
     # return jsonify({'message': 'The new post has been successfully added', 'user_id': user_id, 'content': content})
@@ -138,21 +138,21 @@ def add_post():
 @app.route('/update-post', methods=['PUT'])
 def update_post():
     token = request.form['token']
-    post_id = request.form['post_id']
+    post_id = int(request.form['post_id'])
     user_id = get_uid_by_jwt(token)
     new_content = request.form['content']
 
-    grpc_request = post_api_pb2.AddPostRequest(user_id=user_id, post_id=post_id, new_content=new_content)
+    grpc_request = post_api_pb2.UpdatePostRequest(user_id=user_id, post_id=post_id, new_content=new_content)
     
     response = post_serv.UpdatePost(grpc_request)
     if response.success:
         return jsonify({'message': 'The post has been successfully updated'})
     return InternalServerError('error during update')
 
-@app.route('/delete-post', methods=['DELETE'])
+@app.route('/delete-post', methods=['PUT'])
 def delete_post():
     token = request.form['token']
-    post_id = request.form['post_id']
+    post_id = int(request.form['post_id'])
     user_id = get_uid_by_jwt(token)
 
     grpc_request = post_api_pb2.DeletePostRequest(user_id=user_id, post_id=post_id)
@@ -162,36 +162,38 @@ def delete_post():
     return InternalServerError('Error during delete')
 
 
-@app.route('/get-post', methods=['GET'])
+@app.route('/get-post', methods=['PUT'])
 def get_post():
     token = request.form['token']
-    post_id = request.form['post_id']
+    post_id = int(request.form['post_id'])
     get_uid_by_jwt(token)
 
     grpc_request = post_api_pb2.GetPostRequest(post_id=post_id)
 
     response = post_serv.GetPost(grpc_request)
     if not response.success:
-        return InternalServerError('Error processing the request')
+        return InternalServerError('The post was not found or you do not have enough access rights to delete it')
     content = response.content
     return jsonify({'message': 'The data was successfully received', 'content': content})
 
-@app.route('/get-posts', methods=['GET'])
+@app.route('/get-posts', methods=['PUT'])
 def get_posts():
     token = request.form['token']
-    offset = request.form['offset']
-    number_of_posts = request.form['number_of_posts']
+    offset = int(request.form['offset'])
+    number_of_posts = int(request.form['number_of_posts'])
     get_uid_by_jwt(token)
 
-    grpc_request = post_api_pb2.AddPostRequest(offset=offset, number_of_posts=number_of_posts)
+    grpc_request = post_api_pb2.GetPostsRequest(offset=offset, number_of_posts=number_of_posts)
     
     result = []
     response = post_serv.GetPosts(grpc_request)
-    for post in response:
+    local_post_number = 0
+    for post in response.posts:
         if not post.success:
             return InternalServerError('Error processing the request')
-        result.append(post.content)
-    return jsonify({'posts': result})
+        result.append({'post number': local_post_number, 'content': post.content})
+        local_post_number += 1
+    return jsonify({'result': result})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
@@ -200,3 +202,5 @@ if __name__ == '__main__':
 # curl -d 'username=lavr&password=123' http://127.0.0.1:5000/register
 # curl -d 'username=lavr&password=123' http://127.0.0.1:5000/login
 # curl -X PUT -d 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImxhdnIifQ.s4rvWjGTbOTO_vcElQl1ka6umxRfBhg_95Zn7TwbYrY&email=0000' http://127.0.0.1:5000/update
+# curl -X POST -d 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImxhdnIifQ.s4rvWjGTbOTO_vcElQl1ka6umxRfBhg_95Zn7TwbYrY&content=aaaa' http://127.0.0.1:5000/add-post
+# curl -X PUT -d 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImxhdnIifQ.s4rvWjGTbOTO_vcElQl1ka6umxRfBhg_95Zn7TwbYrY&post_id=3' http://127.0.0.1:5000/delete-post

@@ -2,7 +2,7 @@ services:
   post-service-db:
     image: huecker.io/library/postgres
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: post-db
       POSTGRES_PASSWORD: password
       POSTGRES_DB: post-service-db
     expose:
@@ -17,7 +17,7 @@ services:
     expose:
       - '5001'
     environment:
-      DATABASE_LOCATION: 'postgresql://postgres:password@post-service-db:5200/post-service-db'
+      DATABASE_LOCATION: 'postgresql://post-db:password@post-service-db:5200/post-service-db'
       POST_SERV_PORT: 5001
     depends_on:
       - post-service-db    
@@ -25,7 +25,7 @@ services:
   main-service-db:
     image: huecker.io/library/postgres
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: users
       POSTGRES_PASSWORD: password
       POSTGRES_DB: main-service-db
 
@@ -36,7 +36,7 @@ services:
     ports:
       - '5000:5000'
     environment:
-      DATABASE_LOCATION: 'postgresql://postgres:password@main-service-db:5432/main-service-db'
+      DATABASE_LOCATION: 'postgresql://users:password@main-service-db:5432/main-service-db'
       SECRETS_PATH: './secrets'
       POST_SERV_ADDR: post-service:5001
 
